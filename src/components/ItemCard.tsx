@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
 
 interface ItemCardProps {
   item: {
@@ -34,11 +34,11 @@ export default function ItemCard({
   const hasMultiple = images.length > 1;
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  function prev(e: React.MouseEvent) {
+  function prev(e: MouseEvent) {
     e.stopPropagation();
     setCurrentIndex((i) => (i === 0 ? images.length - 1 : i - 1));
   }
-  function next(e: React.MouseEvent) {
+  function next(e: MouseEvent) {
     e.stopPropagation();
     setCurrentIndex((i) => (i === images.length - 1 ? 0 : i + 1));
   }
@@ -59,7 +59,8 @@ export default function ItemCard({
                 {/* Left arrow */}
                 <button
                   onClick={prev}
-                  className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-opacity cursor-pointer focus:outline-none focus:ring-2 focus:ring-white"
+                  aria-label="Previous image"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -68,7 +69,8 @@ export default function ItemCard({
                 {/* Right arrow */}
                 <button
                   onClick={next}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-opacity cursor-pointer focus:outline-none focus:ring-2 focus:ring-white"
+                  aria-label="Next image"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
