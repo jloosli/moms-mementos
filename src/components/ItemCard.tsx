@@ -80,6 +80,8 @@ export default function ItemCard({
                     <button
                       key={i}
                       onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
+                      aria-label={`Go to image ${i + 1} of ${images.length}`}
+                      aria-current={i === currentIndex ? "true" : undefined}
                       className={`w-1.5 h-1.5 rounded-full transition-colors cursor-pointer ${
                         i === currentIndex ? "bg-white" : "bg-white/50"
                       }`}
