@@ -1,4 +1,4 @@
-import { type MouseEvent, useState } from "react";
+import { useState, type MouseEvent as ReactMouseEvent } from "react";
 
 interface ItemCardProps {
   item: {
@@ -34,11 +34,11 @@ export default function ItemCard({
   const hasMultiple = images.length > 1;
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  function prev(e: MouseEvent) {
+  function prev(e: ReactMouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     setCurrentIndex((i) => (i === 0 ? images.length - 1 : i - 1));
   }
-  function next(e: MouseEvent) {
+  function next(e: ReactMouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     setCurrentIndex((i) => (i === images.length - 1 ? 0 : i + 1));
   }
