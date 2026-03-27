@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { httpsCallable } from "firebase/functions";
+import { db, functions } from "../lib/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import Header from "../components/Header";
 import { Navigate } from "react-router-dom";
@@ -26,6 +27,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [filterCategory, setFilterCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
 
   if (!userProfile?.isAdmin) {
     return <Navigate to="/" replace />;
@@ -81,6 +84,32 @@ export default function AdminPage() {
   const totalInterests = interests.length;
   const itemsWithInterest = Object.keys(interestsByItem).length;
   const uniqueUsers = new Set(interests.map((i) => i.userEmail)).size;
+
+  async function handleSync() {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const syncAirtable = httpsCallable<
+        Record<string, never>,
+        { synced: number; errors: number; total: number }
+      >(functions, "syncAirtable");
+      const result = await syncAirtable({});
+      setSyncResult(
+        `Synced ${result.data.synced} of ${result.data.total} items` +
+          (result.data.errors > 0 ? ` (${result.data.errors} errors)` : "")
+      );
+      // Refresh the items list
+      const itemsSnap = await getDocs(collection(db, "items"));
+      setItems(
+        itemsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Item))
+      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      setSyncResult(`Sync failed: ${message}`);
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   function exportCsv() {
     const rows = [["Item Title", "Category", "Location", "Interested Users", "Count"]];
@@ -156,12 +185,31 @@ export default function AdminPage() {
             ))}
           </select>
           <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="px-4 py-2 bg-green-700 text-white rounded-lg text-sm hover:bg-green-800 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {syncing ? "Syncing…" : "Sync Airtable"}
+          </button>
+          <button
             onClick={exportCsv}
             className="px-4 py-2 bg-purple-700 text-white rounded-lg text-sm hover:bg-purple-800 transition-colors cursor-pointer"
           >
             Export CSV
           </button>
         </div>
+
+        {syncResult && (
+          <div
+            className={`mb-4 px-4 py-2 rounded-lg text-sm ${
+              syncResult.startsWith("Sync failed")
+                ? "bg-red-50 text-red-800 border border-red-200"
+                : "bg-green-50 text-green-800 border border-green-200"
+            }`}
+          >
+            {syncResult}
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-12 text-gray-500">Loading...</div>
