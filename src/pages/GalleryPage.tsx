@@ -18,6 +18,7 @@ interface Item {
   id: string;
   title: string;
   imageUrl: string;
+  imageUrls?: string[];
   category: string;
   location: string;
 }

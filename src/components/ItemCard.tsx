@@ -1,8 +1,11 @@
+import { useState, type MouseEvent as ReactMouseEvent } from "react";
+
 interface ItemCardProps {
   item: {
     id: string;
     title: string;
     imageUrl: string;
+    imageUrls?: string[];
     category: string;
     location: string;
   };
@@ -27,17 +30,69 @@ export default function ItemCard({
   onToggleInterest,
 }: ItemCardProps) {
   const colorClass = categoryColors[item.category] || categoryColors.Other;
+  const images = item.imageUrls?.length ? item.imageUrls : item.imageUrl ? [item.imageUrl] : [];
+  const hasMultiple = images.length > 1;
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  function prev(e: ReactMouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    setCurrentIndex((i) => (i === 0 ? images.length - 1 : i - 1));
+  }
+  function next(e: ReactMouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    setCurrentIndex((i) => (i === images.length - 1 ? 0 : i + 1));
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-      <div className="aspect-square bg-gray-100 overflow-hidden">
-        {item.imageUrl ? (
-          <img
-            src={item.imageUrl}
-            alt={item.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+      <div className="aspect-square bg-gray-100 overflow-hidden relative group">
+        {images.length > 0 ? (
+          <>
+            <img
+              src={images[currentIndex]}
+              alt={item.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            {hasMultiple && (
+              <>
+                {/* Left arrow */}
+                <button
+                  onClick={prev}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-opacity cursor-pointer focus:outline-none focus:ring-2 focus:ring-white"
+                  aria-label="Previous image"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+                {/* Right arrow */}
+                <button
+                  onClick={next}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 transition-opacity cursor-pointer focus:outline-none focus:ring-2 focus:ring-white"
+                  aria-label="Next image"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+                {/* Dot indicators */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
+                      aria-label={`Go to image ${i + 1} of ${images.length}`}
+                      aria-current={i === currentIndex ? "true" : undefined}
+                      className={`w-1.5 h-1.5 rounded-full transition-colors cursor-pointer ${
+                        i === currentIndex ? "bg-white" : "bg-white/50"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
             No Image

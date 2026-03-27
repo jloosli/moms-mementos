@@ -102,16 +102,16 @@ export const syncAirtable = onCall(
         const location = record.fields["Location (Select)"] || "";
         const pictures = record.fields["Item Picture"] || [];
 
-        let imageUrl = "";
-        if (pictures.length > 0) {
-          const pic = pictures[0];
-          imageUrl = pic.thumbnails?.large?.url || pic.url;
-        }
+        const imageUrls = pictures.map(
+          (pic) => pic.thumbnails?.large?.url || pic.url
+        );
+        const imageUrl = imageUrls[0] || "";
 
         const docRef = db.collection("items").doc(record.id);
         batch.set(docRef, {
           title,
           imageUrl,
+          imageUrls,
           category,
           location,
           airtableRecordId: record.id,
