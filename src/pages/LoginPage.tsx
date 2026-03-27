@@ -10,7 +10,7 @@ export default function LoginPage() {
           Mom's Mementos
         </h1>
         <p className="text-gray-600 mb-8">
-          Browse family heirlooms and indicate your interest
+          Browse family items and indicate your interest
         </p>
         <button
           onClick={signInWithGoogle}
